@@ -111,9 +111,9 @@ export default function LoginPage() {
                   },
                 }}
                 providers={['google']}
-                redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard`}
+                redirectTo={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`}
                 view="sign_in"
-                showLinks={true}
+                showLinks={false}
                 localization={{
                   variables: {
                     sign_in: {
