@@ -67,6 +67,25 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Protect admin routes
+  if (req.nextUrl.pathname.startsWith('/admin')) {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+    // TODO: Add admin role check here
+    // const { data: profile } = await supabase
+    //   .from('user_profiles')
+    //   .select('*')
+    //   .eq('id', user.id)
+    //   .single()
+    // 
+    // if (!profile?.is_admin) {
+    //   return NextResponse.redirect(new URL('/dashboard', req.url))
+    // }
+  }
+
   // Redirect authenticated users away from login page
   if (req.nextUrl.pathname === '/login') {
     const { data: { user } } = await supabase.auth.getUser()

@@ -11,10 +11,8 @@ import {
   Download,
   Star,
   Calendar,
-  FileText,
-  ArrowLeft
+  FileText
 } from 'lucide-react'
-import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -107,30 +105,16 @@ export default function StudyMaterialsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard"
-                className="flex items-center text-gray-600 hover:text-[#4DB748] transition-colors"
-              >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back to Dashboard
-              </Link>
-            </div>
-            <div className="flex items-center space-x-2">
-              <BookOpen className="h-6 w-6 text-[#4DB748]" />
-              <h1 className="text-2xl font-bold text-gray-900">Study Materials</h1>
-            </div>
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-2">
+            <BookOpen className="h-8 w-8 text-[#4DB748]" />
+            <h1 className="text-3xl font-bold text-gray-900">Study Materials</h1>
           </div>
+          <p className="text-gray-600">Access all your learning resources in one place</p>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filter Bar */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
@@ -203,7 +187,7 @@ export default function StudyMaterialsPage() {
             <p className="text-gray-600">Try adjusting your search query</p>
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

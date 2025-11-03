@@ -1,0 +1,15 @@
+Admin Routes that should work:
+1. http://localhost:3000/admin - Main admin dashboard
+2. http://localhost:3000/admin/upload - Content upload page
+3. http://localhost:3000/dashboard/study-materials - Study materials (user dashboard)
+
+Make sure:
+- Development server is running (npm run dev)
+- You are logged in first (http://localhost:3000/login)
+- After login, navigate to admin routes
+
+Steps to test:
+1. Start server: npm run dev
+2. Go to: http://localhost:3000
+3. Click login and sign in
+4. Then go to: http://localhost:3000/admin
