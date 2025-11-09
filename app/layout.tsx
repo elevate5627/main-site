@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Elivate - Master Your Education',
   description: 'Access comprehensive study materials, practice questions, and expert guidance to excel in your academic journey',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

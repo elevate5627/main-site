@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { GraduationCap, Menu, X, BookOpen, MessageSquare, FileQuestion, BookMarked, FileText, Microscope, FlaskConical } from 'lucide-react'
+import Image from 'next/image'
+import { Menu, X, BookOpen, MessageSquare, FileQuestion, BookMarked, FileText, Microscope, FlaskConical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
@@ -59,20 +60,24 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#4DB748] transition-transform group-hover:scale-110">
-              <GraduationCap className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-[#4DB748]">Elivate</span>
+          <Link href="/" className="flex items-center group">
+            <Image
+              src="/png/logo-new.png"
+              alt="Elivate"
+              width={140}
+              height={36}
+              className="h-9 w-auto transition-transform group-hover:scale-105"
+              priority
+            />
           </Link>
 
-          <nav className="hidden md:flex items-center justify-center flex-1 space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
+          <nav className="hidden md:flex items-center justify-center flex-1 space-x-6 lg:space-x-8">
+            <Link href="/" className="text-sm lg:text-base text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
               Home
             </Link>
-            <Link href="#about" className="text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
+            <Link href="#about" className="text-sm lg:text-base text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
               About Us
             </Link>
 
@@ -92,7 +97,7 @@ export default function Header() {
                 setHoverTimeout(timeout)
               }}
             >
-              <button className="text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
+              <button className="text-sm lg:text-base text-gray-700 hover:text-[#4DB748] transition-colors font-medium">
                 Resources
               </button>
 
@@ -136,38 +141,39 @@ export default function Header() {
             </div>
           </nav>
 
-          <Link href={user ? "/dashboard" : "/login"}>
-            <Button className="bg-[#4DB748] hover:bg-[#45a840] text-white transition-all duration-200 hover:scale-105">
+          <Link href={user ? "/dashboard" : "/login"} className="ml-4">
+            <Button className="bg-[#4DB748] hover:bg-[#45a840] text-white text-sm lg:text-base font-medium px-5 lg:px-6 transition-all duration-200 hover:scale-105">
               {user ? "Dashboard" : "Login"}
             </Button>
           </Link>
 
           <button
-            className="md:hidden text-gray-700"
+            className="md:hidden text-gray-700 ml-3"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-4 animate-in slide-in-from-top duration-200">
+          <div className="md:hidden py-4 space-y-3 animate-in slide-in-from-top duration-200">
             <Link
               href="/"
-              className="block py-2 text-gray-700 hover:text-[#4DB748] transition-colors font-medium"
+              className="block py-2 text-base text-gray-700 hover:text-[#4DB748] transition-colors font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               href="#about"
-              className="block py-2 text-gray-700 hover:text-[#4DB748] transition-colors font-medium"
+              className="block py-2 text-base text-gray-700 hover:text-[#4DB748] transition-colors font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About Us
             </Link>
 
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2">
               <p className="text-sm font-semibold text-gray-900 py-2">Resources</p>
               {resourceLinks.map((resource) => {
                 const Icon = resource.icon
@@ -175,7 +181,7 @@ export default function Header() {
                   <Link
                     key={resource.name}
                     href="#"
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-[#4DB748]/10 transition-colors"
+                    className="flex items-center space-x-3 p-2.5 rounded-lg hover:bg-[#4DB748]/10 transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Icon className="h-5 w-5 text-[#4DB748]" />
@@ -185,11 +191,13 @@ export default function Header() {
               })}
             </div>
 
-            <Link href={user ? "/dashboard" : "/login"} onClick={() => setIsMobileMenuOpen(false)}>
-              <Button className="w-full bg-[#4DB748] hover:bg-[#45a840] text-white">
-                {user ? "Dashboard" : "Login"}
-              </Button>
-            </Link>
+            <div className="pt-2">
+              <Link href={user ? "/dashboard" : "/login"} onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full bg-[#4DB748] hover:bg-[#45a840] text-white font-medium">
+                  {user ? "Dashboard" : "Login"}
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>

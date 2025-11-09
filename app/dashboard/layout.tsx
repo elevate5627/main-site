@@ -5,8 +5,8 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 import { useUserProfile } from '@/hooks/use-user-profile'
+import Image from 'next/image'
 import { 
-  GraduationCap, 
   LogOut, 
   BookOpen, 
   Brain,
@@ -184,11 +184,17 @@ export default function DashboardLayout({
                 <Menu className="h-6 w-6" />
               </button>
               <Link href="/" className="flex items-center ml-4 lg:ml-0">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#4DB748]">
-                  <GraduationCap className="h-5 w-5 text-white" />
+                <div className="flex items-center justify-center w-10 h-10">
+                  <Image 
+                    src="/png/logo-new.png" 
+                    alt="Elivate Logo" 
+                    width={40} 
+                    height={40}
+                    className="object-contain"
+                  />
                 </div>
                 <div className="ml-3">
-                  <h1 className="text-lg font-bold text-[#4DB748]">Elevate</h1>
+                  <h1 className="text-lg font-bold text-[#4DB748]">Elivate</h1>
                 </div>
               </Link>
             </div>

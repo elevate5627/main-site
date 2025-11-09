@@ -1,0 +1,22 @@
+# Cloudflare Pages Deployment Configuration
+
+# Build configuration
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Build environment variables
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Preview deployment settings
+[preview]
+  [preview.environment]
+  NEXT_PUBLIC_SITE_URL = "https://preview.elivate.pages.dev"
+
+# Production deployment settings
+[production]
+  [production.environment]
+  NEXT_PUBLIC_SITE_URL = "https://elivate.pages.dev"

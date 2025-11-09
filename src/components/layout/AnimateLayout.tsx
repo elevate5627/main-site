@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 interface AnimateLayoutProps {
   children: React.ReactNode;

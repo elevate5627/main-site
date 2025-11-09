@@ -1,0 +1,14 @@
+# Cloudflare Pages Redirects
+# This file handles redirects for client-side routing
+
+# Handle Next.js dynamic routes
+/*    /index.html   200
+
+# Redirect old paths (example)
+# /old-path    /new-path    301
+
+# Force HTTPS (Cloudflare handles this automatically, but you can customize)
+# http://* https://:splat 301
+
+# API routes (if using Cloudflare Workers)
+# /api/*  https://your-api-worker.workers.dev/:splat  200

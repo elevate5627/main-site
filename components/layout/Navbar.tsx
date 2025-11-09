@@ -91,12 +91,15 @@ const Navbar = () => {
         : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Logo />
+        <div className="flex items-center justify-between h-16 w-full">
+          {/* Logo - Left Most */}
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            <Logo />
+            <span className="text-xl font-bold text-gray-900">Elivate</span>
+          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Center */}
+          <div className="hidden md:flex items-center space-x-8 mx-auto">
             {navItems.map((item) => (
               <div key={item.name} className="relative">
                 {item.megaMenu ? (
@@ -130,9 +133,9 @@ const Navbar = () => {
                   <div
                     onMouseEnter={() => setMegaMenuOpen(item.name)}
                     onMouseLeave={() => setMegaMenuOpen(null)}
-                    className="absolute top-full left-0 w-96 bg-white rounded-lg shadow-xl border border-gray-100 p-6 mt-2"
+                    className="absolute top-full left-1/2 transform -translate-x-1/2 w-[600px] bg-white rounded-lg shadow-xl border border-gray-100 p-6 mt-2"
                   >
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-2 gap-6">
                       {item.megaMenu.map((category) => (
                         <div key={category.category}>
                           <h3 className="text-sm font-semibold text-gray-900 mb-3">
@@ -168,8 +171,8 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* Auth Section */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Auth Section - Right Most */}
+          <div className="hidden md:flex items-center flex-shrink-0">
             {loading ? (
               <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
             ) : user ? (

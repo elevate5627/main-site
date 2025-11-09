@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -12,30 +13,30 @@ interface LogoProps {
 const Logo: React.FC<LogoProps> = ({ 
   className = '', 
   size = 'md', 
-  showText = true 
+  showText = false // Changed default to false since we're using the logo image
 }) => {
-  const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
-    lg: 'h-12 w-12'
+  const sizeMap = {
+    sm: { width: 100, height: 26 },
+    md: { width: 140, height: 36 },
+    lg: { width: 160, height: 42 }
   };
 
-  const textSizeClasses = {
-    sm: 'text-lg',
-    md: 'text-xl',
-    lg: 'text-2xl'
+  const heightClasses = {
+    sm: 'h-7',
+    md: 'h-9',
+    lg: 'h-11'
   };
 
   return (
-    <Link href="/" className={`flex items-center space-x-2 ${className}`}>
-      <div className={`${sizeClasses[size]} bg-[#4DB748] rounded-lg flex items-center justify-center`}>
-        <span className="text-white font-bold text-lg">E</span>
-      </div>
-      {showText && (
-        <span className={`font-bold text-gray-900 ${textSizeClasses[size]}`}>
-          Elevate
-        </span>
-      )}
+    <Link href="/" className={`flex items-center ${className} group`}>
+      <Image
+        src="/png/logo-new.png"
+        alt="Elivate"
+        width={sizeMap[size].width}
+        height={sizeMap[size].height}
+        className={`${heightClasses[size]} w-auto transition-transform group-hover:scale-105`}
+        priority
+      />
     </Link>
   );
 };
