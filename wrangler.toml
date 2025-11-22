@@ -1,26 +1,7 @@
 # Cloudflare Pages Deployment Configuration
+name = "main-site"
+pages_build_output_dir = ".vercel/output/static"
 
 # Compatibility settings
 compatibility_date = "2025-11-22"
 compatibility_flags = ["nodejs_compat"]
-
-# Build configuration
-[build]
-  command = "npm run pages:build"
-  publish = ".vercel/output/static"
-
-# Build environment variables
-[build.environment]
-  NODE_VERSION = "18"
-  NPM_VERSION = "9"
-  NEXT_TELEMETRY_DISABLED = "1"
-
-# Preview deployment settings
-[preview]
-  [preview.environment]
-  NEXT_PUBLIC_SITE_URL = "https://preview.elivate.pages.dev"
-
-# Production deployment settings
-[production]
-  [production.environment]
-  NEXT_PUBLIC_SITE_URL = "https://elivate.pages.dev"
