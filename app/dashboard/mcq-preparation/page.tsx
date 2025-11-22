@@ -22,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 
 // MOCK DATA - Remove when real data is integrated
 const MOCK_MCQ_STATS = {
-  totalQuestions: 1250,
+  totalQuestions: 1000,
   attemptedQuestions: 485,
   correctAnswers: 392,
   accuracy: 81,
@@ -32,17 +32,9 @@ const MOCK_MCQ_STATS = {
 }
 
 const MOCK_RECENT_TESTS = [
+  
   {
     id: 1,
-    title: 'Physics - Mechanics Mock Test',
-    date: '2024-01-20',
-    score: 85,
-    totalQuestions: 50,
-    attempted: 50,
-    timeTaken: '45 min'
-  },
-  {
-    id: 2,
     title: 'Chemistry - Organic Practice',
     date: '2024-01-18',
     score: 78,
@@ -51,7 +43,7 @@ const MOCK_RECENT_TESTS = [
     timeTaken: '35 min'
   },
   {
-    id: 3,
+    id: 2,
     title: 'Mathematics - Algebra Set',
     date: '2024-01-15',
     score: 92,
