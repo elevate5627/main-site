@@ -5,6 +5,13 @@
   command = "npm run build"
   publish = ".next"
 
+# Exclude cache and large files
+[site]
+  bucket = ".next"
+
+[[site.exclude]]
+  pattern = ".next/cache/**"
+
 # Build environment variables
 [build.environment]
   NODE_VERSION = "18"
