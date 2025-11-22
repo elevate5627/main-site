@@ -1,6 +1,7 @@
 # Cloudflare Pages Deployment Configuration
 
-# Compatibility flags
+# Compatibility settings
+compatibility_date = "2025-11-22"
 compatibility_flags = ["nodejs_compat"]
 
 # Build configuration
