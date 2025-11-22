@@ -1,5 +1,8 @@
 # Cloudflare Pages Deployment Configuration
 
+# Compatibility flags
+compatibility_flags = ["nodejs_compat"]
+
 # Build configuration
 [build]
   command = "npm run pages:build"
