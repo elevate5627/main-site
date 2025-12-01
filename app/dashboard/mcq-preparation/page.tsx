@@ -6,115 +6,188 @@ import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 import { 
   Brain,
-  Library,
-  TestTube2,
-  Database,
-  ClipboardList,
-  Clock,
+  Search,
+  Filter,
   CheckCircle2,
-  TrendingUp,
-  Award
+  XCircle,
+  ChevronRight
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
-// MOCK DATA - Remove when real data is integrated
-const MOCK_MCQ_STATS = {
-  totalQuestions: 1000,
-  attemptedQuestions: 485,
-  correctAnswers: 392,
-  accuracy: 81,
-  averageTime: '45s',
-  testsCompleted: 12,
-  currentStreak: 5
+interface MCQQuestion {
+  id: string
+  question_text: string
+  course_name: string | null
+  chapter: string | null
+  topic: string | null
+  marks: number | null
+  difficulty: string | null
+  option_1: string | null
+  option_2: string | null
+  option_3: string | null
+  option_4: string | null
+  answer_option_number: number
+  explanation: string | null
+  created_at: string
 }
 
-const MOCK_RECENT_TESTS = [
-  
-  {
-    id: 1,
-    title: 'Chemistry - Organic Practice',
-    date: '2024-01-18',
-    score: 78,
-    totalQuestions: 40,
-    attempted: 40,
-    timeTaken: '35 min'
-  },
-  {
-    id: 2,
-    title: 'Mathematics - Algebra Set',
-    date: '2024-01-15',
-    score: 92,
-    totalQuestions: 30,
-    attempted: 30,
-    timeTaken: '28 min'
-  }
-]
+interface UserAnswer {
+  [questionId: string]: string
+}
 
-const MOCK_CATEGORIES = [
-  {
-    id: 1,
-    title: 'Subject Wise Questions',
-    description: 'Practice questions organized by subjects and topics',
-    icon: Library,
-    href: '/dashboard/mcq-preparation/subject-wise',
-    color: 'bg-blue-500',
-    questionsCount: 450,
-    completed: 180
-  },
-  {
-    id: 2,
-    title: 'Mock Test',
-    description: 'Full-length mock tests to simulate real exam conditions',
-    icon: TestTube2,
-    href: '/dashboard/mcq-preparation/mock-test',
-    color: 'bg-purple-500',
-    questionsCount: 300,
-    completed: 120
-  },
-  {
-    id: 3,
-    title: 'Question Bank',
-    description: 'Extensive collection of questions from previous years',
-    icon: Database,
-    href: '/dashboard/mcq-preparation/question-bank',
-    color: 'bg-green-500',
-    questionsCount: 350,
-    completed: 125
-  },
-  {
-    id: 4,
-    title: 'Practice Set',
-    description: 'Daily practice sets to build consistency',
-    icon: ClipboardList,
-    href: '/dashboard/mcq-preparation/practice-set',
-    color: 'bg-orange-500',
-    questionsCount: 150,
-    completed: 60
-  }
-]
+interface AnswerStatus {
+  [questionId: string]: 'correct' | 'incorrect' | null
+}
 
 export default function McqPreparationPage() {
   const router = useRouter()
   const [supabase] = useState(() => createClient())
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [questions, setQuestions] = useState<MCQQuestion[]>([])
+  const [filteredQuestions, setFilteredQuestions] = useState<MCQQuestion[]>([])
+  const [userAnswers, setUserAnswers] = useState<UserAnswer>({})
+  const [answerStatus, setAnswerStatus] = useState<AnswerStatus>({})
+  const [subjects, setSubjects] = useState<string[]>([])
+  const [filters, setFilters] = useState({
+    course: 'all',
+    subject: 'all',
+    difficulty: 'all',
+    searchQuery: ''
+  })
+  const [courses, setCourses] = useState<string[]>([])
+  const [showResults, setShowResults] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
+      // Skip auth in development
+      if (process.env.NODE_ENV === 'development') {
+        setUser({
+          id: 'dev-user',
+          email: 'dev@localhost',
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as User)
+        setIsLoading(false)
+        fetchQuestions()
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.push('/login')
       } else {
         setUser(session.user)
         setIsLoading(false)
+        fetchQuestions()
       }
     }
 
     getUser()
   }, [supabase, router])
+
+  const fetchQuestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('mcq_questions')
+        .select('*')
+        .order('course_name', { ascending: true })
+        .order('marks', { ascending: true })
+        .limit(100)
+
+      if (error) {
+        console.error('Error fetching questions:', error)
+      } else if (data) {
+        setQuestions(data)
+        setFilteredQuestions(data)
+        
+        // Extract unique courses and subjects
+        const uniqueCourses = Array.from(new Set(data.map(q => q.course_name).filter(Boolean)))
+        const uniqueSubjects = Array.from(new Set(data.map(q => q.course_name).filter(Boolean)))
+        setSubjects(uniqueSubjects as string[])
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
+  useEffect(() => {
+    let filtered = questions
+
+    if (filters.subject !== 'all') {
+      filtered = filtered.filter(q => q.course_name === filters.subject)
+    }
+
+    if (filters.difficulty !== 'all') {
+      filtered = filtered.filter(q => q.difficulty === filters.difficulty)
+    }
+
+    if (filters.searchQuery) {
+      filtered = filtered.filter(q => 
+        q.question_text?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        q.topic?.toLowerCase().includes(filters.searchQuery.toLowerCase()) ||
+        q.chapter?.toLowerCase().includes(filters.searchQuery.toLowerCase())
+      )
+    }
+
+    setFilteredQuestions(filtered)
+  }, [filters, questions])
+
+  const handleAnswerSelect = (questionId: string, answer: string) => {
+    setUserAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }))
+    setAnswerStatus(prev => ({
+      ...prev,
+      [questionId]: null
+    }))
+  }
+
+  const checkAnswer = (questionId: string) => {
+    const question = questions.find(q => q.id === questionId)
+    const userAnswer = userAnswers[questionId]
+    
+    if (question && userAnswer) {
+      const isCorrect = parseInt(userAnswer) === question.answer_option_number
+      setAnswerStatus(prev => ({
+        ...prev,
+        [questionId]: isCorrect ? 'correct' : 'incorrect'
+      }))
+    }
+  }
+
+  const checkAllAnswers = () => {
+    const newStatus: AnswerStatus = {}
+    filteredQuestions.forEach(question => {
+      const userAnswer = userAnswers[question.id]
+      if (userAnswer) {
+        newStatus[question.id] = parseInt(userAnswer) === question.answer_option_number ? 'correct' : 'incorrect'
+      }
+    })
+    setAnswerStatus(newStatus)
+    setShowResults(true)
+  }
+
+  const resetQuiz = () => {
+    setUserAnswers({})
+    setAnswerStatus({})
+    setShowResults(false)
+  }
+
+  const getScore = () => {
+    const answered = Object.keys(userAnswers).length
+    const correct = Object.values(answerStatus).filter(status => status === 'correct').length
+    return { answered, correct, total: filteredQuestions.length }
+  }
 
   if (isLoading) {
     return (
@@ -128,6 +201,20 @@ export default function McqPreparationPage() {
     return null
   }
 
+  const score = getScore()
+  const getDifficultyColor = (difficulty: string | null) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'easy':
+        return 'bg-green-100 text-green-800'
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'hard':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
@@ -135,162 +222,231 @@ export default function McqPreparationPage() {
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <Brain className="h-8 w-8 text-[#4DB748]" />
-            <h1 className="text-3xl font-bold text-gray-900">MCQ Preparation</h1>
+            <h1 className="text-3xl font-bold text-gray-900">MCQ Practice</h1>
           </div>
-          <p className="text-gray-600">Practice and improve your skills with our comprehensive MCQ bank</p>
-        </div>
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Questions Attempted</CardTitle>
-              <ClipboardList className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{MOCK_MCQ_STATS.attemptedQuestions}</div>
-              <p className="text-xs text-muted-foreground">
-                of {MOCK_MCQ_STATS.totalQuestions} total
-              </p>
-              <Progress 
-                value={(MOCK_MCQ_STATS.attemptedQuestions / MOCK_MCQ_STATS.totalQuestions) * 100} 
-                className="mt-2" 
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Accuracy Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{MOCK_MCQ_STATS.accuracy}%</div>
-              <p className="text-xs text-muted-foreground">
-                {MOCK_MCQ_STATS.correctAnswers} correct answers
-              </p>
-              <Progress value={MOCK_MCQ_STATS.accuracy} className="mt-2" />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tests Completed</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{MOCK_MCQ_STATS.testsCompleted}</div>
-              <p className="text-xs text-muted-foreground">
-                Avg. Time: {MOCK_MCQ_STATS.averageTime}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{MOCK_MCQ_STATS.currentStreak} days</div>
-              <p className="text-xs text-muted-foreground">Keep it up! 🔥</p>
-            </CardContent>
-          </Card>
+          <p className="text-gray-600">Practice questions from your uploaded database</p>
         </div>
 
-        {/* Categories Grid */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Practice Categories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {MOCK_CATEGORIES.map((category) => {
-              const Icon = category.icon
-              const completionPercentage = (category.completed / category.questionsCount) * 100
+        {/* Results Summary */}
+        {showResults && (
+          <Card className="mb-6 border-2 border-[#4DB748]">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Quiz Results</h3>
+                  <p className="text-gray-600">
+                    You got {score.correct} out of {score.answered} questions correct
+                  </p>
+                </div>
+                <div className="text-right">
+                  <div className="text-4xl font-bold text-[#4DB748]">
+                    {score.answered > 0 ? Math.round((score.correct / score.answered) * 100) : 0}%
+                  </div>
+                  <Button onClick={resetQuiz} variant="outline" className="mt-2">
+                    Try Again
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Filters */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Search */}
+              <div className="space-y-2">
+                <Label htmlFor="search">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="search"
+                    placeholder="Search questions..."
+                    value={filters.searchQuery}
+                    onChange={(e) => setFilters({ ...filters, searchQuery: e.target.value })}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              {/* Subject Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="subject">Subject</Label>
+                <Select
+                  value={filters.subject}
+                  onValueChange={(value) => setFilters({ ...filters, subject: value })}
+                >
+                  <SelectTrigger id="subject">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Subjects</SelectItem>
+                    {subjects.map(subject => (
+                      <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Difficulty Filter */}
+              <div className="space-y-2">
+                <Label htmlFor="difficulty">Difficulty</Label>
+                <Select
+                  value={filters.difficulty}
+                  onValueChange={(value) => setFilters({ ...filters, difficulty: value })}
+                >
+                  <SelectTrigger id="difficulty">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="Easy">Easy</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="Hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-between items-center">
+              <p className="text-sm text-gray-600">
+                Showing {filteredQuestions.length} question{filteredQuestions.length !== 1 ? 's' : ''}
+              </p>
+              {Object.keys(userAnswers).length > 0 && !showResults && (
+                <Button onClick={checkAllAnswers} className="bg-[#4DB748] hover:bg-[#45a63f]">
+                  Submit Answers ({Object.keys(userAnswers).length}/{filteredQuestions.length})
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Questions List */}
+        <div className="space-y-6">
+          {filteredQuestions.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-12">
+                  <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No questions found</h3>
+                  <p className="text-gray-600">Try adjusting your filters or upload some questions</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredQuestions.map((question, index) => {
+              const userAnswer = userAnswers[question.id]
+              const status = answerStatus[question.id]
               
               return (
-                <Card key={category.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(category.href)}>
+                <Card key={question.id} className={`${status === 'correct' ? 'border-2 border-green-500' : status === 'incorrect' ? 'border-2 border-red-500' : ''}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-lg ${category.color} bg-opacity-10`}>
-                          <Icon className={`h-6 w-6 ${category.color.replace('bg-', 'text-')}`} />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold text-gray-700">Q{index + 1}.</span>
+                          {question.course_name && <Badge variant="outline">{question.course_name}</Badge>}
+                          {question.marks && <Badge variant="secondary">{question.marks} marks</Badge>}
+                          {question.difficulty && (
+                            <Badge className={getDifficultyColor(question.difficulty)}>
+                              {question.difficulty}
+                            </Badge>
+                          )}
+                          {status && (
+                            <Badge variant={status === 'correct' ? 'default' : 'destructive'} className={status === 'correct' ? 'bg-green-500' : ''}>
+                              {status === 'correct' ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                              {status === 'correct' ? 'Correct' : 'Incorrect'}
+                            </Badge>
+                          )}
                         </div>
-                        <div>
-                          <CardTitle className="text-lg">{category.title}</CardTitle>
-                          <CardDescription className="text-sm mt-1">
-                            {category.description}
-                          </CardDescription>
-                        </div>
+                        <CardTitle className="text-lg font-medium text-gray-900">
+                          {question.question_text}
+                        </CardTitle>
+                        {(question.chapter || question.topic) && (
+                          <p className="text-sm text-gray-500 mt-1">
+                            {question.chapter && `Chapter: ${question.chapter}`}
+                            {question.chapter && question.topic && ' • '}
+                            {question.topic && `Topic: ${question.topic}`}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Progress</span>
-                        <span className="font-medium">
-                          {category.completed} / {category.questionsCount} questions
-                        </span>
+                    <RadioGroup
+                      value={userAnswer || ''}
+                      onValueChange={(value) => handleAnswerSelect(question.id, value)}
+                      disabled={showResults}
+                    >
+                      <div className="space-y-3">
+                        {[1, 2, 3, 4].map((optionNum) => {
+                          const optionText = question[`option_${optionNum}` as keyof MCQQuestion]
+                          if (!optionText) return null
+                          
+                          const optionKey = optionNum.toString()
+                          const isCorrectAnswer = optionNum === question.answer_option_number
+                          
+                          return (
+                            <div
+                              key={optionNum}
+                              className={`flex items-start space-x-3 p-3 rounded-lg border-2 transition-colors ${
+                                status && isCorrectAnswer
+                                  ? 'border-green-500 bg-green-50'
+                                  : status && userAnswer === optionKey && !isCorrectAnswer
+                                  ? 'border-red-500 bg-red-50'
+                                  : userAnswer === optionKey
+                                  ? 'border-[#4DB748] bg-[#4DB748]/5'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <RadioGroupItem value={optionKey} id={`${question.id}-${optionNum}`} className="mt-1" />
+                              <Label
+                                htmlFor={`${question.id}-${optionNum}`}
+                                className="flex-1 cursor-pointer font-normal"
+                              >
+                                <span className="font-semibold mr-2">{optionNum}.</span>
+                                {optionText}
+                                {status && isCorrectAnswer && (
+                                  <CheckCircle2 className="inline-block ml-2 h-4 w-4 text-green-600" />
+                                )}
+                              </Label>
+                            </div>
+                          )
+                        })}
                       </div>
-                      <Progress value={completionPercentage} className="h-2" />
-                      <Button 
-                        className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(category.href)
-                        }}
+                    </RadioGroup>
+
+                    {status && question.explanation && (
+                      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm font-semibold text-blue-900 mb-1">Explanation:</p>
+                        <p className="text-sm text-blue-800">{question.explanation}</p>
+                      </div>
+                    )}
+
+                    {!showResults && userAnswer && (
+                      <Button
+                        onClick={() => checkAnswer(question.id)}
+                        variant="outline"
+                        className="mt-4"
+                        size="sm"
                       >
-                        Start Practice
+                        Check Answer
                       </Button>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               )
-            })}
-          </div>
-        </div>
-
-        {/* Recent Tests */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Tests</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {MOCK_RECENT_TESTS.map((test) => (
-              <Card key={test.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">{test.title}</h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {test.timeTaken}
-                        </div>
-                        <div>
-                          {test.attempted}/{test.totalQuestions} questions
-                        </div>
-                        <div>
-                          {new Date(test.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-[#4DB748]">{test.score}%</div>
-                        <div className="text-xs text-gray-500">Score</div>
-                      </div>
-                      <Badge 
-                        variant={test.score >= 80 ? "default" : test.score >= 60 ? "secondary" : "destructive"}
-                        className={test.score >= 80 ? "bg-green-500" : ""}
-                      >
-                        {test.score >= 80 ? "Excellent" : test.score >= 60 ? "Good" : "Needs Work"}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            })
+          )}
         </div>
       </div>
     </div>
   )
 }
-

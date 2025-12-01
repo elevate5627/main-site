@@ -54,17 +54,23 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        router.push('/login')
-      } else {
-        setUser(session.user)
+      // Skip authentication in development mode
+      if (process.env.NODE_ENV === 'development') {
+        const devUser = {
+          id: 'dev-user',
+          email: 'dev@localhost',
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as User
+        setUser(devUser)
         
         // Load existing profile data from database
         const { data: profile, error } = await supabase
           .from('user_profiles')
           .select('*')
-          .eq('user_id', session.user.id)
+          .eq('user_id', devUser.id)
           .single()
 
         if (profile && !error) {

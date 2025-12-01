@@ -45,6 +45,20 @@ export default function AdminLayout({
 
   useEffect(() => {
     const getUser = async () => {
+      // Skip authentication in development mode
+      if (process.env.NODE_ENV === 'development') {
+        setUser({
+          id: 'dev-user',
+          email: 'dev@localhost',
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as User)
+        setIsLoading(false)
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.push('/login')

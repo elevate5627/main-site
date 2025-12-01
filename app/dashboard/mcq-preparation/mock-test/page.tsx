@@ -4,120 +4,121 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
-import { TestTube2, Clock, BookOpen, Play, Eye, Trophy, Calendar } from 'lucide-react'
+import { TestTube2, Clock, CheckCircle2, XCircle, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
 
-// MOCK DATA - Remove when real data is integrated
-const MOCK_TESTS = [
-  {
-    id: 1,
-    title: 'Full Physics Mock Test - Set 1',
-    description: 'Comprehensive physics test covering mechanics, thermodynamics, and modern physics',
-    totalQuestions: 100,
-    duration: 180, // minutes
-    difficulty: 'Hard',
-    subjects: ['Physics'],
-    attempted: false,
-    lastScore: null,
-    totalAttempts: 0
-  },
-  {
-    id: 2,
-    title: 'Chemistry Complete Mock',
-    description: 'Full-length chemistry test with organic, inorganic, and physical chemistry',
-    totalQuestions: 100,
-    duration: 180,
-    difficulty: 'Hard',
-    subjects: ['Chemistry'],
-    attempted: true,
-    lastScore: 78,
-    totalAttempts: 2
-  },
-  {
-    id: 3,
-    title: 'Mathematics Mock - Advanced',
-    description: 'Advanced mathematics covering calculus, algebra, and trigonometry',
-    totalQuestions: 100,
-    duration: 180,
-    difficulty: 'Hard',
-    subjects: ['Mathematics'],
-    attempted: true,
-    lastScore: 92,
-    totalAttempts: 1
-  },
-  {
-    id: 4,
-    title: 'Combined PCM Mock Test',
-    description: 'Full JEE/NEET style combined test with Physics, Chemistry, and Mathematics',
-    totalQuestions: 150,
-    duration: 240,
-    difficulty: 'Expert',
-    subjects: ['Physics', 'Chemistry', 'Mathematics'],
-    attempted: true,
-    lastScore: 85,
-    totalAttempts: 3
-  },
-  {
-    id: 5,
-    title: 'Biology Full Mock - Set 1',
-    description: 'Comprehensive biology test covering botany and zoology',
-    totalQuestions: 100,
-    duration: 180,
-    difficulty: 'Medium',
-    subjects: ['Biology'],
-    attempted: false,
-    lastScore: null,
-    totalAttempts: 0
-  },
-  {
-    id: 6,
-    title: 'Quick Practice Mock - PCM',
-    description: 'Shorter mock test for quick practice sessions',
-    totalQuestions: 60,
-    duration: 90,
-    difficulty: 'Medium',
-    subjects: ['Physics', 'Chemistry', 'Mathematics'],
-    attempted: false,
-    lastScore: null,
-    totalAttempts: 0
-  }
-]
+interface MCQQuestion {
+  id: string
+  question_text: string
+  course_name: string | null
+  chapter: string | null
+  topic: string | null
+  marks: number | null
+  difficulty: string | null
+  option_1: string | null
+  option_2: string | null
+  option_3: string | null
+  option_4: string | null
+  answer_option_number: number
+  explanation: string | null
+}
 
 export default function MockTestPage() {
   const router = useRouter()
   const [supabase] = useState(() => createClient())
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'attempted' | 'new'>('all')
+  const [questions, setQuestions] = useState<MCQQuestion[]>([])
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({})
+  const [showResults, setShowResults] = useState(false)
+  const [testStarted, setTestStarted] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
+      if (process.env.NODE_ENV === 'development') {
+        setUser({
+          id: 'dev-user',
+          email: 'dev@localhost',
+          app_metadata: {},
+          user_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString()
+        } as User)
+        setIsLoading(false)
+        fetchQuestions()
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         router.push('/login')
       } else {
         setUser(session.user)
         setIsLoading(false)
+        fetchQuestions()
       }
     }
 
     getUser()
   }, [supabase, router])
 
-  const filteredTests = MOCK_TESTS.filter(test => {
-    if (filter === 'attempted') return test.attempted
-    if (filter === 'new') return !test.attempted
-    return true
-  })
+  const fetchQuestions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('mcq_questions')
+        .select('*')
+        .order('course_name', { ascending: true })
+        .limit(50)
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy': return 'bg-green-100 text-green-800'
-      case 'Medium': return 'bg-yellow-100 text-yellow-800'
-      case 'Hard': return 'bg-orange-100 text-orange-800'
-      case 'Expert': return 'bg-red-100 text-red-800'
+      if (error) throw error
+      setQuestions(data || [])
+    } catch (error) {
+      console.error('Error fetching questions:', error)
+    }
+  }
+
+  const handleStartTest = () => {
+    setTestStarted(true)
+    setSelectedAnswers({})
+    setShowResults(false)
+  }
+
+  const handleAnswerSelect = (questionId: string, optionNumber: number) => {
+    if (!showResults) {
+      setSelectedAnswers(prev => ({
+        ...prev,
+        [questionId]: optionNumber
+      }))
+    }
+  }
+
+  const handleSubmit = () => {
+    setShowResults(true)
+  }
+
+  const getScore = () => {
+    let correct = 0
+    questions.forEach(q => {
+      if (selectedAnswers[q.id] === q.answer_option_number) {
+        correct++
+      }
+    })
+    return {
+      correct,
+      total: questions.length,
+      answered: Object.keys(selectedAnswers).length
+    }
+  }
+
+  const getDifficultyColor = (difficulty: string | null) => {
+    switch (difficulty?.toLowerCase()) {
+      case 'easy': return 'bg-green-100 text-green-800'
+      case 'medium': return 'bg-yellow-100 text-yellow-800'
+      case 'hard': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -134,129 +135,200 @@ export default function MockTestPage() {
     return null
   }
 
+  const score = getScore()
+
+  if (!testStarted) {
+    return (
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <div className="flex items-center space-x-3 mb-2">
+              <TestTube2 className="h-8 w-8 text-[#4DB748]" />
+              <h1 className="text-3xl font-bold text-gray-900">Mock Test</h1>
+            </div>
+            <p className="text-gray-600">Complete mock test with all available questions</p>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Test Instructions</CardTitle>
+              <CardDescription>Please read the following before starting</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Brain className="h-5 w-5 text-blue-500" />
+                  <span><strong>{questions.length}</strong> questions total</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-orange-500" />
+                  <span>No time limit - practice at your own pace</span>
+                </div>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-yellow-900 mb-2">Instructions:</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-yellow-800">
+                    <li>Select one answer for each question</li>
+                    <li>You can skip questions and come back later</li>
+                    <li>Click "Submit Answers" when you're done</li>
+                    <li>Correct answers will be highlighted in green</li>
+                  </ul>
+                </div>
+                <Button 
+                  onClick={handleStartTest}
+                  className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
+                  size="lg"
+                >
+                  Start Mock Test
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-2">
-            <TestTube2 className="h-8 w-8 text-[#4DB748]" />
-            <h1 className="text-3xl font-bold text-gray-900">Mock Tests</h1>
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Mock Test in Progress</h1>
+              <p className="text-gray-600">{questions.length} questions</p>
+            </div>
           </div>
-          <p className="text-gray-600">Full-length mock tests to simulate real exam conditions</p>
-        </div>
-        {/* Filter Tabs */}
-        <div className="mb-6 flex items-center space-x-4">
-          <Button
-            variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
-            className={filter === 'all' ? 'bg-[#4DB748] hover:bg-[#45a63f]' : ''}
-          >
-            All Tests
-          </Button>
-          <Button
-            variant={filter === 'new' ? 'default' : 'outline'}
-            onClick={() => setFilter('new')}
-            className={filter === 'new' ? 'bg-[#4DB748] hover:bg-[#45a63f]' : ''}
-          >
-            New
-          </Button>
-          <Button
-            variant={filter === 'attempted' ? 'default' : 'outline'}
-            onClick={() => setFilter('attempted')}
-            className={filter === 'attempted' ? 'bg-[#4DB748] hover:bg-[#45a63f]' : ''}
-          >
-            Attempted
-          </Button>
-        </div>
 
-        {/* Mock Tests Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredTests.map((test) => (
-            <Card key={test.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg mb-2">{test.title}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {test.description}
-                    </CardDescription>
+          {showResults && (
+            <Card className="mb-6 border-2 border-[#4DB748]">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">Test Results</h3>
+                    <p className="text-gray-600">
+                      You got {score.correct} out of {score.total} questions correct
+                    </p>
                   </div>
-                  <Badge className={getDifficultyColor(test.difficulty)}>
-                    {test.difficulty}
-                  </Badge>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {test.subjects.map((subject) => (
-                    <Badge key={subject} variant="outline" className="text-xs">
-                      {subject}
-                    </Badge>
-                  ))}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Test Stats */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className="h-4 w-4 text-gray-500" />
-                      <span className="text-gray-600">{test.totalQuestions} Questions</span>
+                  <div className="text-right">
+                    <div className="text-4xl font-bold text-[#4DB748]">
+                      {score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0}%
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span className="text-gray-600">{test.duration} minutes</span>
-                    </div>
-                  </div>
-
-                  {/* Previous Performance */}
-                  {test.attempted && test.lastScore !== null && (
-                    <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Trophy className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-green-900">
-                            Last Score: {test.lastScore}%
-                          </span>
-                        </div>
-                        <span className="text-xs text-green-600">
-                          {test.totalAttempts} {test.totalAttempts === 1 ? 'attempt' : 'attempts'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2">
-                    <Button 
-                      className="flex-1 bg-[#4DB748] hover:bg-[#45a63f]"
-                      onClick={() => alert('Mock test will start here')}
-                    >
-                      <Play className="h-4 w-4 mr-2" />
-                      {test.attempted ? 'Retake Test' : 'Start Test'}
+                    <Button onClick={() => {
+                      setTestStarted(false)
+                      setSelectedAnswers({})
+                      setShowResults(false)
+                    }} variant="outline" className="mt-2">
+                      Restart Test
                     </Button>
-                    {test.attempted && (
-                      <Button 
-                        variant="outline"
-                        onClick={() => alert('View results and analysis')}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Results
-                      </Button>
-                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )}
+
+          {!showResults && Object.keys(selectedAnswers).length > 0 && (
+            <Card className="mb-6">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600">
+                    {Object.keys(selectedAnswers).length} of {questions.length} questions answered
+                  </p>
+                  <Button onClick={handleSubmit} className="bg-[#4DB748] hover:bg-[#45a63f]">
+                    Submit Answers
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {filteredTests.length === 0 && (
-          <div className="text-center py-12">
-            <TestTube2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tests found</h3>
-            <p className="text-gray-600">Try selecting a different filter</p>
-          </div>
-        )}
+        <div className="space-y-6">
+          {questions.map((question, index) => {
+            const selectedAnswer = selectedAnswers[question.id]
+            const isCorrect = selectedAnswer === question.answer_option_number
+
+            return (
+              <Card key={question.id} className="hover:shadow-md transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline">Question {index + 1}</Badge>
+                        {question.difficulty && (
+                          <Badge className={getDifficultyColor(question.difficulty)}>
+                            {question.difficulty}
+                          </Badge>
+                        )}
+                        {question.marks && (
+                          <Badge variant="secondary">{question.marks} marks</Badge>
+                        )}
+                        {showResults && selectedAnswer && (
+                          <Badge variant={isCorrect ? 'default' : 'destructive'} className={isCorrect ? 'bg-green-500' : ''}>
+                            {isCorrect ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                            {isCorrect ? 'Correct' : 'Incorrect'}
+                          </Badge>
+                        )}
+                      </div>
+                      <CardTitle className="text-lg">{question.question_text}</CardTitle>
+                      {(question.chapter || question.topic) && (
+                        <CardDescription className="mt-2">
+                          {question.course_name && `${question.course_name}`}
+                          {question.chapter && ` • Chapter: ${question.chapter}`}
+                          {question.topic && ` • Topic: ${question.topic}`}
+                        </CardDescription>
+                      )}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={selectedAnswer?.toString()}
+                    onValueChange={(value) => handleAnswerSelect(question.id, parseInt(value))}
+                    disabled={showResults}
+                  >
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map(optionNum => {
+                        const optionText = question[`option_${optionNum}` as keyof MCQQuestion]
+                        if (!optionText) return null
+
+                        const isSelected = selectedAnswer === optionNum
+                        const isCorrectOption = question.answer_option_number === optionNum
+                        const showCorrect = showResults && isCorrectOption
+
+                        return (
+                          <div
+                            key={optionNum}
+                            className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-colors ${
+                              showCorrect
+                                ? 'border-green-500 bg-green-50'
+                                : isSelected && showResults && !isCorrectOption
+                                ? 'border-red-500 bg-red-50'
+                                : isSelected
+                                ? 'border-[#4DB748] bg-green-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <RadioGroupItem value={optionNum.toString()} id={`${question.id}-${optionNum}`} />
+                            <Label
+                              htmlFor={`${question.id}-${optionNum}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              <span className="font-semibold mr-2">{optionNum}.</span>
+                              {optionText}
+                              {showCorrect && (
+                                <CheckCircle2 className="inline-block ml-2 h-4 w-4 text-green-600" />
+                              )}
+                            </Label>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

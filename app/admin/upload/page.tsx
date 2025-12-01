@@ -9,8 +9,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Upload, FileText, Brain, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, FileText, Brain, CheckCircle2, AlertCircle, Loader2, FileSpreadsheet } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import Link from 'next/link'
 
 export default function ContentUploadPage() {
   const [supabase] = useState(() => createClient())
@@ -200,19 +201,56 @@ export default function ContentUploadPage() {
             <Upload className="h-8 w-8 text-[#4DB748]" />
             <h1 className="text-3xl font-bold text-gray-900">Content Upload</h1>
           </div>
-          <p className="text-gray-600">Upload study materials and add MCQ questions</p>
+          <p className="text-gray-600">Upload study materials, add MCQ questions, or upload question sets</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-6 space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Brain className="h-6 w-6 text-[#4DB748]" />
+                  <div>
+                    <h3 className="font-semibold">Upload MCQ Questions (CSV)</h3>
+                    <p className="text-sm text-gray-600">Upload your MBBS QBank and IOE MCQ CSV files</p>
+                  </div>
+                </div>
+                <Link href="/admin/upload/mcq-csv">
+                  <Button>
+                    Go to MCQ CSV Upload
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileSpreadsheet className="h-6 w-6 text-[#4DB748]" />
+                  <div>
+                    <h3 className="font-semibold">Upload Question Sets (CSV)</h3>
+                    <p className="text-sm text-gray-600">Upload IOE Engineering and IOM MBBS question papers</p>
+                  </div>
+                </div>
+                <Link href="/admin/upload/question-sets">
+                  <Button>
+                    Go to Question Sets Upload
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Upload Tabs */}
         <Tabs defaultValue="study-materials" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="study-materials">
               <FileText className="h-4 w-4 mr-2" />
               Study Materials
-            </TabsTrigger>
-            <TabsTrigger value="mcq">
-              <Brain className="h-4 w-4 mr-2" />
-              MCQ Questions
             </TabsTrigger>
           </TabsList>
 
@@ -359,167 +397,6 @@ export default function ContentUploadPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* MCQ Questions */}
-          <TabsContent value="mcq">
-            <Card>
-              <CardHeader>
-                <CardTitle>Add MCQ Question</CardTitle>
-                <CardDescription>
-                  Create multiple choice questions for practice tests
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleMCQSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="question">Question *</Label>
-                    <Textarea
-                      id="question"
-                      required
-                      value={mcqData.question}
-                      onChange={(e) => setMCQData({ ...mcqData, question: e.target.value })}
-                      placeholder="Enter your question here..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="mcq-subject">Subject *</Label>
-                      <Input
-                        id="mcq-subject"
-                        required
-                        value={mcqData.subject}
-                        onChange={(e) => setMCQData({ ...mcqData, subject: e.target.value })}
-                        placeholder="Physics"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="topic">Topic *</Label>
-                      <Input
-                        id="topic"
-                        required
-                        value={mcqData.topic}
-                        onChange={(e) => setMCQData({ ...mcqData, topic: e.target.value })}
-                        placeholder="Mechanics"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="mcq-difficulty">Difficulty *</Label>
-                      <Select
-                        value={mcqData.difficulty}
-                        onValueChange={(value) => setMCQData({ ...mcqData, difficulty: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label>Options *</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="optionA">Option A</Label>
-                        <Input
-                          id="optionA"
-                          required
-                          value={mcqData.optionA}
-                          onChange={(e) => setMCQData({ ...mcqData, optionA: e.target.value })}
-                          placeholder="Option A"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="optionB">Option B</Label>
-                        <Input
-                          id="optionB"
-                          required
-                          value={mcqData.optionB}
-                          onChange={(e) => setMCQData({ ...mcqData, optionB: e.target.value })}
-                          placeholder="Option B"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="optionC">Option C</Label>
-                        <Input
-                          id="optionC"
-                          required
-                          value={mcqData.optionC}
-                          onChange={(e) => setMCQData({ ...mcqData, optionC: e.target.value })}
-                          placeholder="Option C"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="optionD">Option D</Label>
-                        <Input
-                          id="optionD"
-                          required
-                          value={mcqData.optionD}
-                          onChange={(e) => setMCQData({ ...mcqData, optionD: e.target.value })}
-                          placeholder="Option D"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="correctAnswer">Correct Answer *</Label>
-                    <Select
-                      value={mcqData.correctAnswer}
-                      onValueChange={(value) => setMCQData({ ...mcqData, correctAnswer: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="A">Option A</SelectItem>
-                        <SelectItem value="B">Option B</SelectItem>
-                        <SelectItem value="C">Option C</SelectItem>
-                        <SelectItem value="D">Option D</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="explanation">Explanation (Optional)</Label>
-                    <Textarea
-                      id="explanation"
-                      value={mcqData.explanation}
-                      onChange={(e) => setMCQData({ ...mcqData, explanation: e.target.value })}
-                      placeholder="Explain why this is the correct answer..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
-                    disabled={uploading}
-                  >
-                    {uploading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Adding Question...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Add Question
-                      </>
-                    )}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {/* Instructions */}
@@ -535,7 +412,7 @@ export default function ContentUploadPage() {
               <li>• Ensure all files are virus-free and safe</li>
               <li>• Use clear, descriptive titles for better searchability</li>
               <li>• Add relevant topics to help students find content</li>
-              <li>• For MCQs, provide detailed explanations when possible</li>
+              <li>• For bulk MCQ uploads, use the CSV uploader above</li>
               <li>• Maximum file size: 50MB per upload</li>
               <li>• Supported formats: PDF, DOC, DOCX, PPT, PPTX</li>
             </ul>

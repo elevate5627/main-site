@@ -10,7 +10,8 @@ import {
   GraduationCap, 
   FolderKanban,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  FileQuestion
 } from 'lucide-react';
 import AnimateLayout from '@/components/layout/AnimateLayout';
 
@@ -31,10 +32,18 @@ const resources = [
   {
     title: "MCQ Preparation",
     description: "Practice with multiple choice questions and tests to boost your exam readiness. Access a wide range of MCQs for various subjects and track your progress.",
-    icon: FileText, // You can use a more relevant icon if available
+    icon: FileText,
     href: "https://mcq.elivate.info",
     color: "from-green-600 to-green-400",
     count: "New!"
+  },
+  {
+    title: "Question Sets",
+    description: "Browse IOE Engineering and IOM MBBS past question papers with detailed information",
+    icon: FileQuestion,
+    href: "/resources/question-sets",
+    color: "from-teal-600 to-teal-400",
+    count: "IOE & IOM"
   },
   {
     title: "Study Notes",

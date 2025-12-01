@@ -3,6 +3,14 @@ import type { NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export async function middleware(req: NextRequest) {
+  // Skip authentication in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  
+  if (isDevelopment) {
+    // Allow all routes in development
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: req.headers,
