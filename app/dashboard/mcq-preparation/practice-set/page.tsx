@@ -194,8 +194,8 @@ export default function PracticeSetPage() {
   }, [user, supabase])
 
   // Get unique subjects and difficulties
-  const subjects = ['all', ...new Set(questions.map(q => q.course_name).filter(Boolean))]
-  const difficulties = ['all', ...new Set(questions.map(q => q.difficulty).filter(Boolean))]
+  const subjects = ['all', ...Array.from(new Set(questions.map(q => q.course_name).filter(Boolean) as string[]))]
+  const difficulties = ['all', ...Array.from(new Set(questions.map(q => q.difficulty).filter(Boolean) as string[]))]
 
   // Filter questions
   const filteredQuestions = questions.filter(q => {

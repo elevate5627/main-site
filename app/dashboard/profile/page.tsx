@@ -75,7 +75,7 @@ export default function ProfilePage() {
 
         if (profile && !error) {
           setProfileData({
-            fullName: profile.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
+            fullName: profile.full_name || devUser.user_metadata?.full_name || devUser.email?.split('@')[0] || '',
             purpose: profile.purpose || '',
             university: profile.university || '',
             department: profile.department || '',
@@ -86,7 +86,7 @@ export default function ProfilePage() {
           // No profile yet, use defaults
           setProfileData(prev => ({
             ...prev,
-            fullName: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || ''
+            fullName: devUser.user_metadata?.full_name || devUser.email?.split('@')[0] || ''
           }))
         }
         

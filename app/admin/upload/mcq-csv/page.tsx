@@ -142,7 +142,7 @@ export default function MCQCSVUploadPage() {
       }
 
       // Get user ID (or use null for development)
-      let userId = null
+      let userId: string | null = null
       try {
         const { data: userData } = await supabase.auth.getUser()
         userId = userData?.user?.id || null
