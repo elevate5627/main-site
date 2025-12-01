@@ -1,0 +1,14 @@
+# Cloudflare Pages Deployment Configuration
+name = "main-site"
+pages_build_output_dir = ".vercel/output/static"
+
+# Compatibility settings
+compatibility_date = "2025-11-22"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm ci && npm run build"
+cwd = "."
+
+[build.environment_variables]
+NODE_VERSION = "18"
