@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { User } from '@supabase/supabase-js'
+import FacultySwitcher from '@/components/FacultySwitcher'
 import { 
   Library,
   BookOpen,
@@ -13,7 +15,8 @@ import {
   ChevronRight,
   ChevronLeft,
   Circle,
-  XCircle
+  XCircle,
+  Brain
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,7 +28,7 @@ import { Label } from '@/components/ui/label'
 interface MCQQuestion {
   id: string
   question_text: string
-  course_name: string | null
+  subject: string | null
   chapter: string | null
   topic: string | null
   marks: number | null
@@ -103,6 +106,7 @@ const MOCK_SUBJECTS_OLD = [
 
 export default function SubjectWisePage() {
   const router = useRouter()
+  const { profile } = useUserProfile()
   const [supabase] = useState(() => createClient())
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -125,7 +129,6 @@ export default function SubjectWisePage() {
           created_at: new Date().toISOString()
         } as User)
         setIsLoading(false)
-        fetchSubjects()
         return
       }
 
@@ -135,35 +138,54 @@ export default function SubjectWisePage() {
       } else {
         setUser(session.user)
         setIsLoading(false)
-        fetchSubjects()
       }
     }
 
     getUser()
   }, [supabase, router])
 
+  // Fetch subjects when both user and profile are ready
+  useEffect(() => {
+    if (user && profile?.faculty) {
+      console.warn('✅ Both user and profile ready, fetching subjects...')
+      fetchSubjects()
+    }
+  }, [user?.id, profile?.faculty])
+
   const fetchSubjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from('mcq_questions')
-        .select('course_name')
+      // Map faculty to institution
+      const institution = profile?.faculty === 'ioe' ? 'IOE' : 'IOM'
 
-      if (error) throw error
+      console.warn('🔍 SUBJECT-WISE PAGE: Fetching subjects for', institution)
 
-      // Group by subject and count questions
-      const subjectMap = new Map<string, number>()
-      data?.forEach(item => {
-        if (item.course_name) {
-          subjectMap.set(item.course_name, (subjectMap.get(item.course_name) || 0) + 1)
-        }
-      })
+      // Fetch subjects from subjects table instead of querying all questions
+      const { data: subjectsData, error: subjectsError } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('institution', institution)
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
 
-      const subjectList: SubjectData[] = Array.from(subjectMap.entries()).map(([name, count]) => ({
-        name,
-        icon: getSubjectIcon(name),
-        totalQuestions: count
-      }))
+      if (subjectsError) throw subjectsError
 
+      // Get question counts for each subject
+      const subjectList: SubjectData[] = []
+      for (const subject of subjectsData || []) {
+        const { count } = await supabase
+          .from('mcq_questions')
+          .select('*', { count: 'exact', head: true })
+          .eq('institution', institution)
+          .eq('subject', subject.subject_name)
+
+        subjectList.push({
+          name: subject.subject_name,
+          icon: getSubjectIcon(subject.subject_name),
+          totalQuestions: count || 0
+        })
+      }
+
+      console.warn('📊 Subjects loaded:', subjectList.map(s => `${s.name} (${s.totalQuestions})`))
       setSubjects(subjectList)
     } catch (error) {
       console.error('Error fetching subjects:', error)
@@ -175,7 +197,7 @@ export default function SubjectWisePage() {
       const { data, error } = await supabase
         .from('mcq_questions')
         .select('*')
-        .eq('course_name', subjectName)
+        .eq('subject', subjectName)
         .order('marks', { ascending: true })
         .limit(50)
 
@@ -193,10 +215,14 @@ export default function SubjectWisePage() {
     if (name.includes('mathematic')) return '📐'
     if (name.includes('physic')) return '⚛️'
     if (name.includes('chemist')) return '🧪'
+    if (name.includes('english')) return '📚'
+    if (name.includes('botan')) return '🌿'
+    if (name.includes('zoolog')) return '🦋'
+    if (name.includes('mat')) return '🧠'
     if (name.includes('biolog')) return '🧬'
     if (name.includes('anatomy')) return '🫀'
     if (name.includes('physiolog')) return '💉'
-    return '📚'
+    return '📖'
   }
 
   const handleSubjectClick = (subjectName: string) => {
@@ -261,52 +287,147 @@ export default function SubjectWisePage() {
   const score = getScore()
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8">
         {!selectedSubject ? (
           <>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Choose a Subject</h2>
-              <p className="text-gray-600">Practice questions organized by subjects</p>
+            {/* Header Section */}
+            <div className="mb-8">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="p-3 bg-gradient-to-br from-[#4DB748] to-emerald-600 rounded-xl shadow-lg">
+                  <Library className="h-7 w-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Subject-Wise Practice</h1>
+                  <p className="text-gray-600 mt-1">Master each subject with targeted practice sessions</p>
+                </div>
+              </div>
+              
+              {/* Stats Bar */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Subjects</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{subjects.length}</p>
+                    </div>
+                    <BookOpen className="h-8 w-8 text-blue-500 opacity-80" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Questions</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">
+                        {subjects.reduce((sum, s) => sum + s.totalQuestions, 0)}
+                      </p>
+                    </div>
+                    <Brain className="h-8 w-8 text-purple-500 opacity-80" />
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">Active Subjects</p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">
+                        {subjects.filter(s => s.totalQuestions > 0).length}
+                      </p>
+                    </div>
+                    <CheckCircle2 className="h-8 w-8 text-green-500 opacity-80" />
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-[#4DB748] to-emerald-600 rounded-xl p-4 shadow-md text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-white/90">Ready to Start</p>
+                      <p className="text-2xl font-bold mt-1">Let's Go!</p>
+                    </div>
+                    <Play className="h-8 w-8 text-white/90" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {subjects.map((subject) => {
+            {/* Subject Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {subjects.map((subject, index) => {
+                const colors = [
+                  { gradient: 'from-blue-500 to-blue-600', bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
+                  { gradient: 'from-purple-500 to-purple-600', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' },
+                  { gradient: 'from-pink-500 to-pink-600', bg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200' },
+                  { gradient: 'from-orange-500 to-orange-600', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' },
+                  { gradient: 'from-teal-500 to-teal-600', bg: 'bg-teal-50', text: 'text-teal-600', border: 'border-teal-200' },
+                ]
+                const colorScheme = colors[index % colors.length]
+                
                 return (
                   <Card 
                     key={subject.name} 
-                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    className="group relative overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 hover:border-[#4DB748] hover:-translate-y-1"
                     onClick={() => handleSubjectClick(subject.name)}
                   >
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="text-4xl">{subject.icon}</div>
+                    {/* Gradient Header */}
+                    <div className={`h-2 bg-gradient-to-r ${colorScheme.gradient}`} />
+                    
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`${colorScheme.bg} p-3 rounded-xl ${colorScheme.border} border-2`}>
+                            <span className="text-4xl">{subject.icon}</span>
+                          </div>
                           <div>
-                            <CardTitle className="text-xl">{subject.name}</CardTitle>
-                            <CardDescription>
-                              {subject.totalQuestions} questions available
+                            <CardTitle className="text-xl group-hover:text-[#4DB748] transition-colors">
+                              {subject.name}
+                            </CardTitle>
+                            <CardDescription className="mt-1.5 flex items-center space-x-1">
+                              <BookOpen className="h-3.5 w-3.5" />
+                              <span>{subject.totalQuestions} questions</span>
                             </CardDescription>
                           </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                        <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-[#4DB748] group-hover:translate-x-1 transition-all" />
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Total Questions</span>
-                          <span className="font-semibold text-gray-900">{subject.totalQuestions}</span>
+
+                    <CardContent className="space-y-4">
+                      {/* Progress Info */}
+                      <div className={`${colorScheme.bg} rounded-lg p-3 border ${colorScheme.border}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-gray-600">Questions Available</span>
+                          <span className={`text-sm font-bold ${colorScheme.text}`}>
+                            {subject.totalQuestions}
+                          </span>
                         </div>
-                        <Button 
-                          className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleSubjectClick(subject.name)
-                          }}
-                        >
-                          Start Practice
-                        </Button>
+                        <div className="w-full bg-white rounded-full h-2 overflow-hidden">
+                          <div 
+                            className={`h-full bg-gradient-to-r ${colorScheme.gradient} transition-all duration-500`}
+                            style={{ width: '100%' }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button 
+                        className={`w-full bg-gradient-to-r ${colorScheme.gradient} hover:opacity-90 text-white font-medium shadow-md transition-all group/btn`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSubjectClick(subject.name)
+                        }}
+                      >
+                        <Play className="h-4 w-4 mr-2 group-hover/btn:translate-x-0.5 transition-transform" />
+                        Start Practice
+                      </Button>
+
+                      {/* Quick Stats */}
+                      <div className="flex items-center justify-between pt-2 border-t text-xs text-gray-500">
+                        <div className="flex items-center space-x-1">
+                          <Brain className="h-3.5 w-3.5" />
+                          <span>MCQ Practice</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>~{Math.ceil(subject.totalQuestions * 1.5)} min</span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -314,13 +435,20 @@ export default function SubjectWisePage() {
               })}
             </div>
 
+            {/* Empty State */}
             {subjects.length === 0 && (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-12">
-                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No subjects found</h3>
-                    <p className="text-gray-600">Upload questions from the admin panel to get started</p>
+              <Card className="border-2 border-dashed border-gray-300">
+                <CardContent className="pt-12 pb-12">
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                      <BookOpen className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Subjects Available</h3>
+                    <p className="text-gray-600 mb-6">Questions will appear here once they are uploaded to the system</p>
+                    <Button variant="outline">
+                      <Library className="h-4 w-4 mr-2" />
+                      Contact Admin
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -485,6 +613,7 @@ export default function SubjectWisePage() {
           </>
         )}
       </div>
+      {process.env.NODE_ENV === 'development' && <FacultySwitcher />}
     </div>
   )
 }

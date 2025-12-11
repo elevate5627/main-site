@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 
+/**
+ * Development Mode Configuration:
+ * Change the 'faculty' value in the mockProfile below to test different views:
+ * - 'ioe' for IOE Engineering subjects (Physics, Chemistry, Mathematics, English)
+ * - 'mbbs' for IOM MBBS subjects (Physics, Chemistry, Botany, Zoology, MAT)
+ */
+
 export interface UserProfile {
   user_id: string
   full_name: string
@@ -26,6 +33,43 @@ export function useUserProfile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        // Skip authentication in development mode
+        if (process.env.NODE_ENV === 'development') {
+          // Check localStorage for saved faculty preference
+          const savedFaculty = typeof window !== 'undefined' 
+            ? localStorage.getItem('dev_faculty') 
+            : null
+          
+          console.warn('🎓 USER PROFILE - DEVELOPMENT MODE')
+          console.warn('Saved Faculty from localStorage:', savedFaculty)
+          console.warn('Will use faculty:', savedFaculty || 'ioe (default)')
+          
+          const devUser = {
+            id: 'dev-user',
+            email: 'dev@localhost',
+            app_metadata: {},
+            user_metadata: {},
+            aud: 'authenticated',
+            created_at: new Date().toISOString()
+          } as User
+
+          const mockProfile: UserProfile = {
+            user_id: 'dev-user',
+            full_name: 'Dev User',
+            purpose: 'mcq-preparation',
+            faculty: (savedFaculty as 'ioe' | 'mbbs') || 'ioe',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+
+          console.warn('Mock Profile Created:', mockProfile)
+
+          setUser(devUser)
+          setProfile(mockProfile)
+          setIsLoading(false)
+          return
+        }
+
         const { data: { session } } = await supabase.auth.getSession()
         
         if (!session) {
