@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { User } from '@supabase/supabase-js'
 import { useUserProfile } from '@/hooks/use-user-profile'
+import { NotificationDropdown } from '@/components/dashboard/NotificationDropdown'
 import Image from 'next/image'
 import { 
   LogOut, 
@@ -213,8 +214,12 @@ export default function DashboardLayout({
               </Link>
             </div>
 
-            {/* Right side - User menu */}
-            <div className="flex items-center">
+            {/* Right side - Notifications & User menu */}
+            <div className="flex items-center gap-2">
+              {/* Notification Icon */}
+              <NotificationDropdown />
+              
+              {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-3 hover:bg-gray-100">
