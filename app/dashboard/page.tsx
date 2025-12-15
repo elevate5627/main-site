@@ -124,10 +124,45 @@ export default function DashboardPage() {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Left Column - Resume Practice & QOTD */}
+          {/* Left Column - Start Practice & QOTD */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Resume Practice Card */}
-            <ResumePracticeCard />
+            {/* Start Your Practice Card */}
+            <Card className="border-2 border-[#4DB748]">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Target className="h-6 w-6 text-[#4DB748]" />
+                  <CardTitle>Start Your Practice</CardTitle>
+                </div>
+                <CardDescription>
+                  Begin your learning journey with MCQ practice or study materials
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => router.push('/dashboard/mcq-preparation')}
+                    className="w-full h-auto py-4 flex-col items-start bg-[#4DB748] hover:bg-[#45a63f]"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Brain className="h-5 w-5" />
+                      <span className="text-lg font-semibold">MCQ Practice</span>
+                    </div>
+                    <span className="text-xs opacity-90">Test your knowledge with practice questions</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => router.push('/dashboard/mcq-preparation/mock-test')}
+                    className="w-full h-auto py-4 flex-col items-start bg-purple-600 hover:bg-purple-700"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Trophy className="h-5 w-5" />
+                      <span className="text-lg font-semibold">Mock Test</span>
+                    </div>
+                    <span className="text-xs opacity-90">Take full-length practice exams</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Question of the Day */}
             {profile?.purpose === 'mcq-preparation' && <QuestionOfTheDay />}
@@ -371,50 +406,29 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/dashboard/mcq-preparation')}>
-            <CardContent className="pt-6">
+        {/* Explore More */}
+        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 hover:shadow-lg transition-all">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                  <Brain className="h-6 w-6 text-white" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">MCQ Practice</h3>
-                  <p className="text-xs text-muted-foreground">Test your knowledge</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">Want to Explore More?</h3>
+                  <p className="text-sm text-gray-600">Discover all the features available for MCQ practice and study materials</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/dashboard/study-materials')}>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Study Materials</h3>
-                  <p className="text-xs text-muted-foreground">Access resources</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/dashboard/mcq-preparation/mock-test')}>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                  <Trophy className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Mock Tests</h3>
-                  <p className="text-xs text-muted-foreground">Full practice exams</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Button
+                onClick={() => router.push('/dashboard/explore')}
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8"
+              >
+                View Here
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -113,6 +113,29 @@ export default function MockTestPage() {
     }
   }, [profile])
 
+  // Restore test state on page load/refresh
+  useEffect(() => {
+    const isTestActive = sessionStorage.getItem('mockTestActive')
+    const savedStartTime = sessionStorage.getItem('mockTestStartTime')
+    const savedAnswers = sessionStorage.getItem('mockTestAnswers')
+    const savedMarked = sessionStorage.getItem('mockTestMarked')
+    
+    if (isTestActive === 'true' && savedStartTime && questions.length > 0) {
+      setTestStarted(true)
+      setTestStartTime(savedStartTime)
+      if (savedAnswers) setAnswers(JSON.parse(savedAnswers))
+      if (savedMarked) setMarkedForReview(JSON.parse(savedMarked))
+    }
+  }, [questions])
+
+  // Persist answers and marked questions
+  useEffect(() => {
+    if (testStarted) {
+      sessionStorage.setItem('mockTestAnswers', JSON.stringify(answers))
+      sessionStorage.setItem('mockTestMarked', JSON.stringify(markedForReview))
+    }
+  }, [answers, markedForReview, testStarted])
+
   const fetchQuestions = async (faculty: 'ioe' | 'mbbs', rules: MockTestRules) => {
     try {
       setQuestionsLoading(true)
@@ -149,12 +172,17 @@ export default function MockTestPage() {
   }
 
   const handleStartTest = () => {
+    const startTime = new Date().toISOString()
     setTestStarted(true)
-    setTestStartTime(new Date().toISOString())
+    setTestStartTime(startTime)
     setAnswers({})
     setMarkedForReview([])
     setShowResults(false)
     setCurrentQuestionIndex(0)
+    
+    // Persist test state
+    sessionStorage.setItem('mockTestActive', 'true')
+    sessionStorage.setItem('mockTestStartTime', startTime)
   }
 
   const handleNavigate = (index: number) => {
@@ -203,6 +231,12 @@ export default function MockTestPage() {
 
     setTestSubmitted(true)
     setShowSubmitDialog(false)
+    
+    // Clear session storage
+    sessionStorage.removeItem('mockTestActive')
+    sessionStorage.removeItem('mockTestStartTime')
+    sessionStorage.removeItem('mockTestAnswers')
+    sessionStorage.removeItem('mockTestMarked')
     
     const score = calculateScore(questions, answers, testRules)
     
@@ -378,20 +412,40 @@ export default function MockTestPage() {
 
   // Test in Progress - Display all questions
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Content - All Questions */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Timer */}
-            <MockTestTimer
-              startTime={testStartTime}
-              duration={testRules.duration}
-              onTimeUp={handleTimeUp}
-            />
+    <>
+      <div className="min-h-screen bg-gray-50">
+        {/* Fixed Header - Timer and Submit Button */}
+        <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-200 shadow-md">
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <MockTestTimer
+                startTime={testStartTime}
+                duration={testRules.duration}
+                onTimeUp={handleTimeUp}
+              />
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setShowSubmitDialog(true)}
+              size="lg"
+              className="px-8 py-6 text-lg font-semibold"
+            >
+              <Send className="h-5 w-5 mr-2" />
+              Submit Test
+            </Button>
+          </div>
+        </div>
+      </div>
 
-            {/* All Questions */}
-            <div className="space-y-6">
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Content - All Questions */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* All Questions */}
+              <div className="space-y-6">
               {questions.map((question, index) => {
                 const questionAnswer = answers[question.id]
                 const isQuestionMarked = markedForReview.includes(question.id)
@@ -481,32 +535,21 @@ export default function MockTestPage() {
                   </Card>
                 )
               })}
+              </div>
             </div>
-          </div>
 
-          {/* Sidebar - Fixed Question Navigator & Submit */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-6 space-y-4">
-              {/* Question Navigator */}
-              <QuestionNavigator
-                totalQuestions={questions.length}
-                answers={answers}
-                markedForReview={markedForReview}
-                currentIndex={currentQuestionIndex}
-                questionIds={questions.map(q => q.id)}
-                onNavigate={handleNavigate}
-              />
-
-              {/* Submit Button */}
-              <Button
-                variant="destructive"
-                onClick={() => setShowSubmitDialog(true)}
-                className="w-full py-6 text-lg font-semibold"
-                size="lg"
-              >
-                <Send className="h-5 w-5 mr-2" />
-                Submit Test
-              </Button>
+            {/* Sidebar - Question Navigator */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <QuestionNavigator
+                  totalQuestions={questions.length}
+                  answers={answers}
+                  markedForReview={markedForReview}
+                  currentIndex={currentQuestionIndex}
+                  questionIds={questions.map(q => q.id)}
+                  onNavigate={handleNavigate}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -546,5 +589,6 @@ export default function MockTestPage() {
         </DialogContent>
       </Dialog>
     </div>
+</>
   )
 }
