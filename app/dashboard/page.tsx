@@ -85,10 +85,10 @@ export default function DashboardPage() {
           <p className="text-gray-600">
             {profile ? (
               profile.purpose === 'study-material' 
-                ? `${profile.department || 'Your'} - ${profile.university || 'University'} - Semester ${profile.semester || ''}`
+                ? `${profile.department || 'Computer Engineering'} - ${profile.university || 'Tribhuvan University'} - Semester ${profile.semester || '5'}`
                 : `${profile.faculty?.toUpperCase() || 'MCQ'} Preparation`
             ) : (
-              "Let's continue your learning journey"
+              "Access your study materials and learning resources"
             )}
           </p>
         </div>
@@ -126,46 +126,97 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Left Column - Start Practice & QOTD */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Start Your Practice Card */}
+            {/* Start Your Learning Card */}
             <Card className="border-2 border-[#4DB748]">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Target className="h-6 w-6 text-[#4DB748]" />
-                  <CardTitle>Start Your Practice</CardTitle>
+                  <CardTitle>Start Your Learning</CardTitle>
                 </div>
                 <CardDescription>
-                  Begin your learning journey with MCQ practice or study materials
+                  Access study materials and learning resources for your courses
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button
-                    onClick={() => router.push('/dashboard/mcq-preparation')}
+                    onClick={() => router.push('/dashboard/study-materials')}
                     className="w-full h-auto py-4 flex-col items-start bg-[#4DB748] hover:bg-[#45a63f]"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <BookOpen className="h-5 w-5" />
+                      <span className="text-lg font-semibold">Study Materials</span>
+                    </div>
+                    <span className="text-xs opacity-90">Access notes, books and resources</span>
+                  </Button>
+
+                  <Button
+                    onClick={() => router.push('/dashboard/mcq-preparation')}
+                    className="w-full h-auto py-4 flex-col items-start bg-blue-600 hover:bg-blue-700"
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <Brain className="h-5 w-5" />
                       <span className="text-lg font-semibold">MCQ Practice</span>
                     </div>
-                    <span className="text-xs opacity-90">Test your knowledge with practice questions</span>
-                  </Button>
-
-                  <Button
-                    onClick={() => router.push('/dashboard/mcq-preparation/mock-test')}
-                    className="w-full h-auto py-4 flex-col items-start bg-purple-600 hover:bg-purple-700"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Trophy className="h-5 w-5" />
-                      <span className="text-lg font-semibold">Mock Test</span>
-                    </div>
-                    <span className="text-xs opacity-90">Take full-length practice exams</span>
+                    <span className="text-xs opacity-90">Test your knowledge with questions</span>
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Question of the Day */}
+            {/* Question of the Day - Only for MCQ Preparation */}
             {profile?.purpose === 'mcq-preparation' && <QuestionOfTheDay />}
+
+            {/* Study Materials Quick Access */}
+            {profile?.purpose === 'study-material' && (
+              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-6 w-6 text-blue-600" />
+                    <CardTitle>Quick Access</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Jump to your frequently used materials
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex-col items-start"
+                      onClick={() => router.push('/dashboard/study-materials?type=notes')}
+                    >
+                      <span className="text-sm font-semibold">Lecture Notes</span>
+                      <span className="text-xs text-muted-foreground">Class notes & PDFs</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex-col items-start"
+                      onClick={() => router.push('/dashboard/study-materials?type=labs')}
+                    >
+                      <span className="text-sm font-semibold">Lab Materials</span>
+                      <span className="text-xs text-muted-foreground">Lab manuals & guides</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex-col items-start"
+                      onClick={() => router.push('/dashboard/study-materials?type=syllabus')}
+                    >
+                      <span className="text-sm font-semibold">Syllabus</span>
+                      <span className="text-xs text-muted-foreground">Course outlines</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto py-3 flex-col items-start"
+                      onClick={() => router.push('/dashboard/study-materials')}
+                    >
+                      <span className="text-sm font-semibold">View All</span>
+                      <span className="text-xs text-muted-foreground">Browse everything</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

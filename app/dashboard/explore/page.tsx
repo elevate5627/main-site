@@ -23,7 +23,7 @@ import {
   TrendingUp,
   Award,
   Users,
-  Download
+  Eye
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -180,9 +180,9 @@ export default function ExploreFeaturesPage() {
       color: 'from-cyan-500 to-cyan-600'
     },
     {
-      icon: Download,
-      title: 'Offline Access',
-      description: 'Download materials for offline study without internet connection',
+      icon: Eye,
+      title: 'Online Access',
+      description: 'View and study materials online anytime from your dashboard',
       route: '/dashboard/study-materials',
       color: 'from-violet-500 to-violet-600'
     }

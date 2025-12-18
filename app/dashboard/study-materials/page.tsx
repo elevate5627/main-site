@@ -8,10 +8,10 @@ import {
   BookOpen, 
   Search,
   Filter,
-  Download,
   Star,
   Calendar,
-  FileText
+  FileText,
+  Eye
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -52,7 +52,7 @@ export default function StudyMaterialsPage() {
     getUser()
   }, [supabase, router])
 
-  // Sample study materials data
+  // Sample study materials data (view-only mode)
   const studyMaterials = [
     {
       id: 1,
@@ -60,7 +60,7 @@ export default function StudyMaterialsPage() {
       subject: 'Computer Science',
       description: 'Comprehensive notes covering arrays, linked lists, trees, graphs, and sorting algorithms.',
       pages: 45,
-      downloads: 2300,
+      downloads: 2300, // Actually represents views
       rating: 4.8,
       lastUpdated: '2024-01-15',
       category: 'Notes'
@@ -71,7 +71,7 @@ export default function StudyMaterialsPage() {
       subject: 'Computer Science',
       description: 'Complete guide to DBMS concepts, SQL, normalization, and transaction management.',
       pages: 38,
-      downloads: 1800,
+      downloads: 1800, // Actually represents views
       rating: 4.7,
       lastUpdated: '2024-01-10',
       category: 'Notes'
@@ -82,7 +82,7 @@ export default function StudyMaterialsPage() {
       subject: 'Computer Science',
       description: 'Process management, memory management, file systems, and system calls explained.',
       pages: 52,
-      downloads: 2100,
+      downloads: 2100, // Actually represents views
       rating: 4.9,
       lastUpdated: '2024-01-20',
       category: 'Notes'
@@ -93,7 +93,7 @@ export default function StudyMaterialsPage() {
       subject: 'Computer Science',
       description: 'Networking fundamentals, protocols, OSI model, and network security basics.',
       pages: 41,
-      downloads: 1500,
+      downloads: 1500, // Actually represents views
       rating: 4.6,
       lastUpdated: '2024-01-12',
       category: 'Notes'
@@ -176,7 +176,7 @@ export default function StudyMaterialsPage() {
                 
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                   <span>{material.pages} pages</span>
-                  <span>{material.downloads.toLocaleString()} downloads</span>
+                  <span>{material.downloads.toLocaleString()} views</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -185,8 +185,7 @@ export default function StudyMaterialsPage() {
                     {new Date(material.lastUpdated).toLocaleDateString()}
                   </div>
                   <Button size="sm" className="bg-[#4DB748] hover:bg-[#45a63f]">
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
+                    View Material
                   </Button>
                 </div>
               </CardContent>

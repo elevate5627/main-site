@@ -56,8 +56,10 @@ export function useUserProfile() {
           const mockProfile: UserProfile = {
             user_id: 'dev-user',
             full_name: 'Dev User',
-            purpose: 'mcq-preparation',
-            faculty: (savedFaculty as 'ioe' | 'mbbs') || 'ioe',
+            purpose: 'study-material',
+            university: 'Tribhuvan University',
+            department: 'Computer Engineering',
+            semester: '5',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }

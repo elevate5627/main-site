@@ -10,162 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 
-// MOCK DATA - Remove when real data is integrated
-const MOCK_LAB_NOTES = [
-  {
-    id: 1,
-    title: 'Data Structures Lab - Complete Practicals',
-    subject: 'Computer Science',
-    semester: 3,
-    description: 'All lab programs including arrays, linked lists, stacks, queues, trees, and graphs with code and output.',
-    experiments: 12,
-    size: '8.5 MB',
-    format: 'PDF + Code',
-    downloads: 1890,
-    views: 4320,
-    rating: 4.7,
-    lastUpdated: '2024-01-15',
-    topics: ['Arrays', 'Linked Lists', 'Stacks', 'Queues', 'Trees', 'Graphs'],
-    language: 'C/C++',
-    difficulty: 'Medium'
-  },
-  {
-    id: 2,
-    title: 'DBMS Lab Manual - SQL & PL/SQL',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'Database lab exercises covering DDL, DML, joins, triggers, cursors, and procedures.',
-    experiments: 10,
-    size: '6.8 MB',
-    format: 'PDF + SQL',
-    downloads: 2340,
-    views: 5120,
-    rating: 4.8,
-    lastUpdated: '2024-01-18',
-    topics: ['DDL', 'DML', 'Joins', 'Triggers', 'Stored Procedures', 'Cursors'],
-    language: 'SQL/PL-SQL',
-    difficulty: 'Medium'
-  },
-  {
-    id: 3,
-    title: 'Operating Systems Lab Programs',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'OS lab programs including scheduling algorithms, memory management, and system calls.',
-    experiments: 11,
-    size: '7.2 MB',
-    format: 'PDF + Code',
-    downloads: 1560,
-    views: 3890,
-    rating: 4.6,
-    lastUpdated: '2024-01-12',
-    topics: ['CPU Scheduling', 'Memory Management', 'File Systems', 'System Calls', 'Deadlocks'],
-    language: 'C',
-    difficulty: 'Hard'
-  },
-  {
-    id: 4,
-    title: 'Computer Networks Lab - Packet Tracer',
-    subject: 'Computer Science',
-    semester: 5,
-    description: 'Network simulation exercises using Cisco Packet Tracer and Wireshark analysis.',
-    experiments: 8,
-    size: '15.4 MB',
-    format: 'PDF + .pkt files',
-    downloads: 1120,
-    views: 2890,
-    rating: 4.5,
-    lastUpdated: '2024-01-10',
-    topics: ['Network Topology', 'Routing', 'TCP/IP', 'DHCP', 'DNS', 'VLANs'],
-    language: 'Packet Tracer',
-    difficulty: 'Medium'
-  },
-  {
-    id: 5,
-    title: 'Java Programming Lab - OOP Concepts',
-    subject: 'Computer Science',
-    semester: 3,
-    description: 'Java lab programs covering OOP concepts, exception handling, collections, and GUI.',
-    experiments: 15,
-    size: '9.7 MB',
-    format: 'PDF + Java Code',
-    downloads: 2680,
-    views: 5890,
-    rating: 4.9,
-    lastUpdated: '2024-01-20',
-    topics: ['Classes', 'Inheritance', 'Polymorphism', 'Exception Handling', 'Collections', 'Swing'],
-    language: 'Java',
-    difficulty: 'Medium'
-  },
-  {
-    id: 6,
-    title: 'Web Technologies Lab - Full Stack',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'Complete web development lab including HTML, CSS, JavaScript, PHP, and MySQL.',
-    experiments: 14,
-    size: '11.3 MB',
-    format: 'PDF + Code',
-    downloads: 3120,
-    views: 6780,
-    rating: 4.8,
-    lastUpdated: '2024-01-22',
-    topics: ['HTML5', 'CSS3', 'JavaScript', 'PHP', 'MySQL', 'AJAX'],
-    language: 'HTML/CSS/JS/PHP',
-    difficulty: 'Easy'
-  },
-  {
-    id: 7,
-    title: 'Python Programming Lab Manual',
-    subject: 'Computer Science',
-    semester: 3,
-    description: 'Python lab exercises covering basics to advanced topics including NumPy and Pandas.',
-    experiments: 13,
-    size: '8.9 MB',
-    format: 'PDF + .py files',
-    downloads: 2450,
-    views: 5320,
-    rating: 4.9,
-    lastUpdated: '2024-01-25',
-    topics: ['Python Basics', 'Functions', 'OOP', 'File Handling', 'NumPy', 'Pandas'],
-    language: 'Python',
-    difficulty: 'Easy'
-  },
-  {
-    id: 8,
-    title: 'Computer Graphics Lab - OpenGL',
-    subject: 'Computer Science',
-    semester: 5,
-    description: 'Graphics programming lab with OpenGL covering 2D and 3D transformations.',
-    experiments: 10,
-    size: '10.2 MB',
-    format: 'PDF + Code',
-    downloads: 890,
-    views: 2110,
-    rating: 4.4,
-    lastUpdated: '2024-01-08',
-    topics: ['2D Shapes', '3D Objects', 'Transformations', 'Lighting', 'Textures', 'Animation'],
-    language: 'C/OpenGL',
-    difficulty: 'Hard'
-  },
-  {
-    id: 9,
-    title: 'Microprocessor Lab - 8086 Programs',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'Assembly language programming for 8086 microprocessor with practical examples.',
-    experiments: 12,
-    size: '7.5 MB',
-    format: 'PDF + ASM',
-    downloads: 1340,
-    views: 3210,
-    rating: 4.3,
-    lastUpdated: '2024-01-05',
-    topics: ['8086 Architecture', 'Assembly', 'Arithmetic Operations', 'String Operations', 'Interrupts'],
-    language: 'Assembly',
-    difficulty: 'Hard'
-  }
-]
+// TODO: Integrate real lab notes data from database
+const MOCK_LAB_NOTES: any[] = []
 
 export default function LabsNotePage() {
   const router = useRouter()
@@ -275,46 +121,6 @@ export default function LabsNotePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <FlaskConical className="h-8 w-8 text-[#4DB748] mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_LAB_NOTES.length}</p>
-                <p className="text-sm text-gray-500">Lab Manuals</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Code className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_LAB_NOTES.reduce((sum, l) => sum + l.experiments, 0)}</p>
-                <p className="text-sm text-gray-500">Total Experiments</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Download className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_LAB_NOTES.reduce((sum, l) => sum + l.downloads, 0).toLocaleString()}</p>
-                <p className="text-sm text-gray-500">Downloads</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Star className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{(MOCK_LAB_NOTES.reduce((sum, l) => sum + l.rating, 0) / MOCK_LAB_NOTES.length).toFixed(1)}</p>
-                <p className="text-sm text-gray-500">Avg. Rating</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Lab Notes Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredLabs.map((lab) => (
@@ -388,22 +194,14 @@ export default function LabsNotePage() {
                   </div>
                 </div>
 
-                <div className="flex space-x-2">
+                <div>
                   <Button 
-                    className="flex-1 bg-[#4DB748] hover:bg-[#45a63f]"
+                    className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
                     size="sm"
                     onClick={() => alert('View lab manual functionality')}
                   >
                     <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    onClick={() => alert('Download lab manual functionality')}
-                  >
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
+                    View Lab Manual
                   </Button>
                 </div>
               </CardContent>

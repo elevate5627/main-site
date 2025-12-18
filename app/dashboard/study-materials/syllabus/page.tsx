@@ -11,185 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 
-// MOCK DATA - Remove when real data is integrated
-const MOCK_SYLLABUS = [
-  {
-    id: 1,
-    title: 'Data Structures and Algorithms Syllabus',
-    subject: 'Computer Science',
-    semester: 3,
-    description: 'Complete syllabus covering linear and non-linear data structures, searching and sorting algorithms.',
-    units: 5,
-    topics: 12,
-    size: '2.4 MB',
-    format: 'PDF',
-    downloads: 3450,
-    views: 7890,
-    lastUpdated: '2024-01-15',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'Arrays and Strings', completed: true },
-      { unit: 'Unit 2', name: 'Linked Lists', completed: true },
-      { unit: 'Unit 3', name: 'Stacks and Queues', completed: false },
-      { unit: 'Unit 4', name: 'Trees and Graphs', completed: false },
-      { unit: 'Unit 5', name: 'Sorting and Searching', completed: false }
-    ]
-  },
-  {
-    id: 2,
-    title: 'Database Management Systems Syllabus',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'DBMS syllabus including relational model, SQL, normalization, transactions, and database design.',
-    units: 5,
-    topics: 15,
-    size: '2.8 MB',
-    format: 'PDF',
-    downloads: 4120,
-    views: 8950,
-    lastUpdated: '2024-01-18',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'Introduction to DBMS', completed: true },
-      { unit: 'Unit 2', name: 'Relational Model & SQL', completed: true },
-      { unit: 'Unit 3', name: 'Normalization', completed: true },
-      { unit: 'Unit 4', name: 'Transactions & Concurrency', completed: false },
-      { unit: 'Unit 5', name: 'Database Design', completed: false }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Operating Systems Syllabus',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'OS syllabus covering processes, threads, memory management, file systems, and deadlocks.',
-    units: 5,
-    topics: 14,
-    size: '2.6 MB',
-    format: 'PDF',
-    downloads: 3680,
-    views: 7230,
-    lastUpdated: '2024-01-12',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'Introduction to OS', completed: true },
-      { unit: 'Unit 2', name: 'Process Management', completed: true },
-      { unit: 'Unit 3', name: 'Memory Management', completed: false },
-      { unit: 'Unit 4', name: 'File Systems', completed: false },
-      { unit: 'Unit 5', name: 'Deadlocks & Security', completed: false }
-    ]
-  },
-  {
-    id: 4,
-    title: 'Computer Networks Syllabus',
-    subject: 'Computer Science',
-    semester: 5,
-    description: 'Networking syllabus including OSI model, TCP/IP, routing protocols, and network security.',
-    units: 5,
-    topics: 13,
-    size: '2.5 MB',
-    format: 'PDF',
-    downloads: 2890,
-    views: 6120,
-    lastUpdated: '2024-01-10',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'Network Fundamentals', completed: true },
-      { unit: 'Unit 2', name: 'OSI & TCP/IP Model', completed: false },
-      { unit: 'Unit 3', name: 'Data Link & Network Layer', completed: false },
-      { unit: 'Unit 4', name: 'Transport Layer', completed: false },
-      { unit: 'Unit 5', name: 'Application Layer & Security', completed: false }
-    ]
-  },
-  {
-    id: 5,
-    title: 'Object-Oriented Programming Syllabus',
-    subject: 'Computer Science',
-    semester: 3,
-    description: 'OOP syllabus covering classes, inheritance, polymorphism, and Java programming.',
-    units: 5,
-    topics: 11,
-    size: '2.3 MB',
-    format: 'PDF',
-    downloads: 4560,
-    views: 9340,
-    lastUpdated: '2024-01-20',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'OOP Concepts', completed: true },
-      { unit: 'Unit 2', name: 'Classes and Objects', completed: true },
-      { unit: 'Unit 3', name: 'Inheritance', completed: true },
-      { unit: 'Unit 4', name: 'Polymorphism', completed: false },
-      { unit: 'Unit 5', name: 'Exception Handling', completed: false }
-    ]
-  },
-  {
-    id: 6,
-    title: 'Software Engineering Syllabus',
-    subject: 'Computer Science',
-    semester: 5,
-    description: 'SE syllabus including SDLC, agile methodologies, testing, and project management.',
-    units: 5,
-    topics: 12,
-    size: '2.7 MB',
-    format: 'PDF',
-    downloads: 2340,
-    views: 5670,
-    lastUpdated: '2024-01-08',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'Introduction to SE', completed: true },
-      { unit: 'Unit 2', name: 'SDLC Models', completed: false },
-      { unit: 'Unit 3', name: 'Requirements Engineering', completed: false },
-      { unit: 'Unit 4', name: 'Design & Testing', completed: false },
-      { unit: 'Unit 5', name: 'Project Management', completed: false }
-    ]
-  },
-  {
-    id: 7,
-    title: 'Web Technologies Syllabus',
-    subject: 'Computer Science',
-    semester: 4,
-    description: 'Web tech syllabus covering HTML, CSS, JavaScript, PHP, and web frameworks.',
-    units: 5,
-    topics: 16,
-    size: '2.9 MB',
-    format: 'PDF',
-    downloads: 5230,
-    views: 10120,
-    lastUpdated: '2024-01-22',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'HTML & CSS', completed: true },
-      { unit: 'Unit 2', name: 'JavaScript Basics', completed: true },
-      { unit: 'Unit 3', name: 'DOM & Events', completed: true },
-      { unit: 'Unit 4', name: 'PHP & MySQL', completed: false },
-      { unit: 'Unit 5', name: 'Web Frameworks', completed: false }
-    ]
-  },
-  {
-    id: 8,
-    title: 'Artificial Intelligence Syllabus',
-    subject: 'Computer Science',
-    semester: 6,
-    description: 'AI syllabus covering search algorithms, knowledge representation, machine learning, and neural networks.',
-    units: 5,
-    topics: 14,
-    size: '3.1 MB',
-    format: 'PDF',
-    downloads: 3890,
-    views: 7650,
-    lastUpdated: '2024-01-25',
-    academicYear: '2023-24',
-    coverage: [
-      { unit: 'Unit 1', name: 'AI Fundamentals', completed: false },
-      { unit: 'Unit 2', name: 'Search Algorithms', completed: false },
-      { unit: 'Unit 3', name: 'Knowledge Representation', completed: false },
-      { unit: 'Unit 4', name: 'Machine Learning', completed: false },
-      { unit: 'Unit 5', name: 'Neural Networks', completed: false }
-    ]
-  }
-]
+// TODO: Integrate real syllabus data from database
+const MOCK_SYLLABUS: any[] = []
 
 export default function SyllabusPage() {
   const router = useRouter()
@@ -289,46 +112,6 @@ export default function SyllabusPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <ClipboardList className="h-8 w-8 text-[#4DB748] mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_SYLLABUS.length}</p>
-                <p className="text-sm text-gray-500">Subjects</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <BookOpen className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_SYLLABUS.reduce((sum, s) => sum + s.units, 0)}</p>
-                <p className="text-sm text-gray-500">Total Units</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Download className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{MOCK_SYLLABUS.reduce((sum, s) => sum + s.downloads, 0).toLocaleString()}</p>
-                <p className="text-sm text-gray-500">Downloads</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{Math.round((MOCK_SYLLABUS.reduce((sum, s) => sum + s.coverage.filter(c => c.completed).length, 0) / MOCK_SYLLABUS.reduce((sum, s) => sum + s.coverage.length, 0)) * 100)}%</p>
-                <p className="text-sm text-gray-500">Coverage</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Syllabus Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredSyllabus.map((syl) => {
@@ -409,22 +192,14 @@ export default function SyllabusPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex space-x-2 pt-2">
+                    <div className="pt-2">
                       <Button 
-                        className="flex-1 bg-[#4DB748] hover:bg-[#45a63f]"
+                        className="w-full bg-[#4DB748] hover:bg-[#45a63f]"
                         size="sm"
                         onClick={() => alert('View syllabus functionality')}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => alert('Download syllabus functionality')}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Download
+                        View Syllabus
                       </Button>
                     </div>
                   </div>
